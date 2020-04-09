@@ -1,4 +1,4 @@
-A simple in memory LFU(Least Frequently Used) cache(support concurrency) for golang
+A simple in memory LFU(Least Frequently Used) cache with high-performance and concurrency support for golang
 
 ```go
 cache := lfucache.NewLfuCache(1024) // max cache 1024 items 

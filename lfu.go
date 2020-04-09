@@ -34,32 +34,35 @@ func (c *LfuCache) Get(key string) (val interface{}, has bool) {
 }
 
 func (c *LfuCache) Set(key string, value interface{}) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
+	c.lock.RLock()
 	f, has := c.valueMap[key]
+	c.lock.RUnlock()
 	if has {
 		f.value = value
 	} else {
+		c.lock.Lock()
 		c.valueMap[key] = &freq{
 			value: value,
 			count: 1,
 		}
-	}
-
-	// 清理访问次数最少的
-	if len(c.valueMap) >= c.Capacity {
-		minKey := key
-		minFreq := c.valueMap[minKey]
-		for k, f := range c.valueMap {
-			if f.count <= minFreq.count {
-				minKey = k
-				minFreq = f
+		// 清理访问次数最少的
+		if len(c.valueMap) > c.Capacity {
+			minKey := key
+			minFreq := c.valueMap[minKey]
+			for k, f := range c.valueMap {
+				if f.count < minFreq.count {
+					minKey = k
+					minFreq = f
+					if f.count == 1 {
+						break
+					}
+				}
+			}
+			if minKey != key {
+				delete(c.valueMap, minKey)
 			}
 		}
-		if minKey != key {
-			delete(c.valueMap, minKey)
-		}
+		c.lock.Unlock()
 	}
 }
 
