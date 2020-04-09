@@ -50,7 +50,7 @@ func (c *LfuCache) Set(key string, value interface{}) {
 			minKey := key
 			minFreq := c.valueMap[minKey]
 			for k, f := range c.valueMap {
-				if f.count < minFreq.count {
+				if f.count <= minFreq.count {
 					minKey = k
 					minFreq = f
 					if f.count == 1 {
@@ -75,4 +75,11 @@ func (c *LfuCache) Clear() int {
 		delete(c.valueMap, k)
 	}
 	return count
+}
+
+// length of current cache list
+func (c *LfuCache) Len() int {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	return len(c.valueMap)
 }
