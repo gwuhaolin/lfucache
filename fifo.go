@@ -2,73 +2,75 @@ package lfucache
 
 import "sync"
 
-type LfuCache struct {
+type FifoCache struct {
 	Cache
 	Capacity int
-	valueMap map[string]*freq
+	valueMap map[string]*index
 	lock     *sync.RWMutex
+	nowIndex uint
 }
 
-type freq struct {
+type index struct {
 	value interface{}
-	count int
+	i     uint
 }
 
-func NewLfuCache(capacity int) *LfuCache {
-	return &LfuCache{
+const maxUint = ^uint(0)
+
+func NewFifoCache(capacity int) *FifoCache {
+	return &FifoCache{
 		Capacity: capacity,
-		valueMap: make(map[string]*freq),
+		valueMap: make(map[string]*index),
 		lock:     new(sync.RWMutex),
 	}
 }
 
-func (c *LfuCache) Get(key string) (val interface{}, has bool) {
+func (c *FifoCache) Get(key string) (val interface{}, has bool) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	f, has := c.valueMap[key]
 	if !has {
 		return nil, has
 	} else {
-		f.count++
 		return f.value, has
 	}
 }
 
-func (c *LfuCache) Set(key string, value interface{}) {
+func (c *FifoCache) Set(key string, value interface{}) {
 	c.lock.RLock()
 	f, has := c.valueMap[key]
 	c.lock.RUnlock()
 	if has {
 		f.value = value
 	} else {
+		if c.nowIndex > maxUint {
+			c.Clear()
+			return
+		}
 		c.lock.Lock()
-		c.valueMap[key] = &freq{
+		c.nowIndex++
+		c.valueMap[key] = &index{
 			value: value,
-			count: 1,
+			i:     c.nowIndex,
 		}
 		// 清理访问次数最少的
 		if len(c.valueMap) > c.Capacity {
 			minKey := key
-			minFreq := c.valueMap[minKey]
+			minI := c.valueMap[minKey].i
 			for k, f := range c.valueMap {
-				if f.count <= minFreq.count {
+				if f.i <= minI {
 					minKey = k
-					minFreq = f
-					if f.count == 1 {
-						break
-					}
+					minI = f.i
 				}
 			}
-			if minKey != key {
-				delete(c.valueMap, minKey)
-			}
+			delete(c.valueMap, minKey)
 		}
 		c.lock.Unlock()
 	}
 }
 
 // 清空
-func (c *LfuCache) Clear() int {
+func (c *FifoCache) Clear() int {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	count := len(c.valueMap)
@@ -79,7 +81,7 @@ func (c *LfuCache) Clear() int {
 }
 
 // length of current cache list
-func (c *LfuCache) Len() int {
+func (c *FifoCache) Len() int {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	return len(c.valueMap)
