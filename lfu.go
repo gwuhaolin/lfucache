@@ -11,10 +11,10 @@ type LfuCache struct {
 
 type freq struct {
 	value interface{}
-	count int
+	flag  int
 }
 
-func NewLfuCache(capacity int) *LfuCache {
+func NewLfuCache(capacity int) Cache {
 	return &LfuCache{
 		Capacity: capacity,
 		valueMap: make(map[string]*freq),
@@ -29,7 +29,7 @@ func (c *LfuCache) Get(key string) (val interface{}, has bool) {
 	if !has {
 		return nil, has
 	} else {
-		f.count++
+		f.flag++
 		return f.value, has
 	}
 }
@@ -44,17 +44,17 @@ func (c *LfuCache) Set(key string, value interface{}) {
 		c.lock.Lock()
 		c.valueMap[key] = &freq{
 			value: value,
-			count: 1,
+			flag:  1,
 		}
 		// 清理访问次数最少的
 		if len(c.valueMap) > c.Capacity {
 			minKey := key
 			minFreq := c.valueMap[minKey]
 			for k, f := range c.valueMap {
-				if f.count <= minFreq.count {
+				if f.flag <= minFreq.flag {
 					minKey = k
 					minFreq = f
-					if f.count == 1 {
+					if f.flag == 1 {
 						break
 					}
 				}

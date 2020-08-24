@@ -12,12 +12,12 @@ type FifoCache struct {
 
 type index struct {
 	value interface{}
-	i     uint
+	flag  uint
 }
 
 const maxUint = ^uint(0)
 
-func NewFifoCache(capacity int) *FifoCache {
+func NewFifoCache(capacity int) Cache {
 	return &FifoCache{
 		Capacity: capacity,
 		valueMap: make(map[string]*index),
@@ -43,24 +43,23 @@ func (c *FifoCache) Set(key string, value interface{}) {
 	if has {
 		f.value = value
 	} else {
-		if c.nowIndex > maxUint {
-			c.Clear()
-			return
-		}
 		c.lock.Lock()
+		if c.nowIndex >= maxUint {
+			c.Clear()
+		}
 		c.nowIndex++
 		c.valueMap[key] = &index{
 			value: value,
-			i:     c.nowIndex,
+			flag:  c.nowIndex,
 		}
 		// 清理访问次数最少的
 		if len(c.valueMap) > c.Capacity {
 			minKey := key
-			minI := c.valueMap[minKey].i
+			minI := c.valueMap[minKey].flag
 			for k, f := range c.valueMap {
-				if f.i <= minI {
+				if f.flag <= minI {
 					minKey = k
-					minI = f.i
+					minI = f.flag
 				}
 			}
 			delete(c.valueMap, minKey)
@@ -74,9 +73,8 @@ func (c *FifoCache) Clear() int {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	count := len(c.valueMap)
-	for k := range c.valueMap {
-		delete(c.valueMap, k)
-	}
+	c.valueMap = map[string]*index{}
+	c.nowIndex = 0
 	return count
 }
 
