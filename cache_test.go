@@ -11,24 +11,24 @@ func testGetSet(t *testing.T, cacheBuilder func(capacity int) Cache) {
 	_, has := cache.Get("a")
 	assert.Equal(t, has, false)
 
-	cache.Set("a", 1)
+	cache.Set("a", "A")
 	v, has := cache.Get("a")
 	assert.Equal(t, has, true)
-	assert.Equal(t, v, 1)
+	assert.Equal(t, v, "A")
 }
 
 func testCapacity(t *testing.T, cacheBuilder func(capacity int) Cache) {
 	cache := cacheBuilder(3)
-	cache.Set("a", 1)
-	cache.Set("b", 2)
+	cache.Set("a", "A")
+	cache.Set("b", "B")
 	assert.Equal(t, cache.Len(), 2)
-	cache.Set("c", 3)
+	cache.Set("c", "C")
 	assert.Equal(t, cache.Len(), 3)
-	cache.Set("d", 4)
+	cache.Set("d", "D")
 	assert.Equal(t, cache.Len(), 3)
 	v, has := cache.Get("d")
 	assert.Equal(t, has, true)
-	assert.Equal(t, v, 4)
+	assert.Equal(t, v, "D")
 }
 
 func TestFifo(t *testing.T) {
