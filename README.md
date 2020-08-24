@@ -1,3 +1,4 @@
+![Go](https://github.com/gwuhaolin/lfucache/workflows/Go/badge.svg)
 A simple in memory cache with high-performance and concurrency support for golang, includes LFU(Least Frequently Used) & FIFO(First In First Out).
 
 ```go
