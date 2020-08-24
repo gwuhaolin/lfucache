@@ -18,8 +18,8 @@ if val, has := cache.Get("key"); has {
 cache.Set("key", val)
 
 // clear all cache
-cache.Clear()
+len:=cache.Clear()
 
 // cache current length
-cache.Len()
+len:=cache.Len()
 ```
