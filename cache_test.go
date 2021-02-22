@@ -15,6 +15,11 @@ func testGetSet(t *testing.T, cacheBuilder func(capacity int) Cache) {
 	v, has := cache.Get("a")
 	assert.Equal(t, has, true)
 	assert.Equal(t, v, "A")
+
+	cache.Del("a")
+	v, has = cache.Get("a")
+	assert.Nil(t, v)
+	assert.Equal(t, has, false)
 }
 
 func testCapacity(t *testing.T, cacheBuilder func(capacity int) Cache) {
