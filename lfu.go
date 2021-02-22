@@ -67,6 +67,12 @@ func (c *LfuCache) Set(key string, value interface{}) {
 	}
 }
 
+func (c *LfuCache) Del(key string) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	delete(c.valueMap, key)
+}
+
 // 清空
 func (c *LfuCache) Clear() int {
 	c.lock.Lock()

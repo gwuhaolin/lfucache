@@ -68,6 +68,13 @@ func (c *FifoCache) Set(key string, value interface{}) {
 	}
 }
 
+func (c *FifoCache) Del(key string) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.nowIndex--
+	delete(c.valueMap, key)
+}
+
 // 清空
 func (c *FifoCache) Clear() int {
 	c.lock.Lock()
