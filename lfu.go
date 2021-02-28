@@ -4,7 +4,7 @@ import "sync"
 
 type LfuCache struct {
 	Cache
-	Capacity int
+	Capacity uint
 	valueMap map[string]*freq
 	lock     *sync.RWMutex
 }
@@ -14,7 +14,7 @@ type freq struct {
 	flag  int
 }
 
-func NewLfuCache(capacity int) Cache {
+func NewLfuCache(capacity uint) Cache {
 	return &LfuCache{
 		Capacity: capacity,
 		valueMap: make(map[string]*freq),
@@ -47,7 +47,7 @@ func (c *LfuCache) Set(key string, value interface{}) {
 			flag:  1,
 		}
 		// 清理访问次数最少的
-		if len(c.valueMap) > c.Capacity {
+		if uint(len(c.valueMap)) > c.Capacity {
 			minKey := key
 			minFreq := c.valueMap[minKey]
 			for k, f := range c.valueMap {

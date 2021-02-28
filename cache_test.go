@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testGetSet(t *testing.T, cacheBuilder func(capacity int) Cache) {
+func testGetSet(t *testing.T, cacheBuilder func(capacity uint) Cache) {
 	cache := cacheBuilder(1024)
 	_, has := cache.Get("a")
 	assert.Equal(t, has, false)
@@ -22,7 +22,7 @@ func testGetSet(t *testing.T, cacheBuilder func(capacity int) Cache) {
 	assert.Equal(t, has, false)
 }
 
-func testCapacity(t *testing.T, cacheBuilder func(capacity int) Cache) {
+func testCapacity(t *testing.T, cacheBuilder func(capacity uint) Cache) {
 	cache := cacheBuilder(3)
 	cache.Set("a", "A")
 	cache.Set("b", "B")
@@ -30,7 +30,7 @@ func testCapacity(t *testing.T, cacheBuilder func(capacity int) Cache) {
 	cache.Set("c", "C")
 	assert.Equal(t, cache.Len(), 3)
 	cache.Set("d", "D")
-	assert.Equal(t, cache.Len(), 3)
+	assert.Greater(t, 3, cache.Len())
 	v, has := cache.Get("d")
 	assert.Equal(t, has, true)
 	assert.Equal(t, v, "D")

@@ -4,7 +4,7 @@ import "sync"
 
 type FifoCache struct {
 	Cache
-	Capacity int
+	Capacity uint
 	valueMap map[string]*index
 	lock     *sync.RWMutex
 	nowIndex uint
@@ -17,7 +17,7 @@ type index struct {
 
 const maxUint = ^uint(0)
 
-func NewFifoCache(capacity int) Cache {
+func NewFifoCache(capacity uint) Cache {
 	return &FifoCache{
 		Capacity: capacity,
 		valueMap: make(map[string]*index),
@@ -37,34 +37,31 @@ func (c *FifoCache) Get(key string) (val interface{}, has bool) {
 }
 
 func (c *FifoCache) Set(key string, value interface{}) {
-	c.lock.RLock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	f, has := c.valueMap[key]
-	c.lock.RUnlock()
 	if has {
 		f.value = value
 	} else {
-		c.lock.Lock()
 		if c.nowIndex >= maxUint {
-			c.Clear()
+			// 清除
+			c.valueMap = map[string]*index{}
+			c.nowIndex = 0
 		}
 		c.nowIndex++
 		c.valueMap[key] = &index{
 			value: value,
 			flag:  c.nowIndex,
 		}
-		// 清理访问次数最少的
-		if len(c.valueMap) > c.Capacity {
-			minKey := key
-			minI := c.valueMap[minKey].flag
+		// 清理访问次数最少的1/4
+		if uint(len(c.valueMap)) > c.Capacity {
+			min := c.nowIndex - c.Capacity/4
 			for k, f := range c.valueMap {
-				if f.flag <= minI {
-					minKey = k
-					minI = f.flag
+				if f.flag < min {
+					delete(c.valueMap, k)
 				}
 			}
-			delete(c.valueMap, minKey)
 		}
-		c.lock.Unlock()
 	}
 }
 
