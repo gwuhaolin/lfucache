@@ -53,9 +53,9 @@ func (c *FifoCache) Set(key string, value interface{}) {
 			value: value,
 			flag:  c.nowIndex,
 		}
-		// 清理访问次数最少的1/4
+		// 清理访问次数最少的1/2
 		if uint(len(c.valueMap)) > c.Capacity {
-			min := c.nowIndex - c.Capacity/4
+			min := c.nowIndex - c.Capacity/2
 			for k, f := range c.valueMap {
 				if f.flag < min {
 					delete(c.valueMap, k)
