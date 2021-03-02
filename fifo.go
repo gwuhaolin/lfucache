@@ -66,6 +66,12 @@ func (c *FifoCache) Set(key string, value interface{}) {
 }
 
 func (c *FifoCache) Del(key string) {
+	c.lock.RLock()
+	_, has := c.valueMap[key]
+	c.lock.RUnlock()
+	if !has {
+		return
+	}
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	c.nowIndex--
