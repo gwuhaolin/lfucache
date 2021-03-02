@@ -74,7 +74,6 @@ func (c *FifoCache) Del(key string) {
 	}
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	c.nowIndex--
 	delete(c.valueMap, key)
 }
 
