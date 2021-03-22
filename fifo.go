@@ -25,19 +25,15 @@ func NewFifoCache(capacity uint) Cache {
 	}
 }
 
-func (c *FifoCache) OptGet(key string) (val interface{}, has bool) {
+func (c *FifoCache) Get(key string) (val interface{}, has bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 	f, has := c.valueMap[key]
 	if !has {
 		return nil, has
 	} else {
 		return f.value, has
 	}
-}
-
-func (c *FifoCache) Get(key string) (val interface{}, has bool) {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	return c.Get(key)
 }
 
 func (c *FifoCache) Set(key string, value interface{}) {
