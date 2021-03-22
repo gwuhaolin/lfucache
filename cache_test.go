@@ -41,7 +41,7 @@ func TestFifo(t *testing.T) {
 	testCapacity(t, NewFifoCache)
 }
 
-func TestLFU(t *testing.T) {
-	testGetSet(t, NewLfuCache)
-	testCapacity(t, NewLfuCache)
-}
+//func TestLFU(t *testing.T) {
+//	testGetSet(t, NewLfuCache)
+//	testCapacity(t, NewLfuCache)
+//}
