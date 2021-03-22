@@ -38,7 +38,10 @@ func (c *FifoCache) Get(key string) (val interface{}, has bool) {
 
 func (c *FifoCache) Set(key string, value interface{}) {
 	c.lock.Lock()
-	defer c.lock.Unlock()
+	defer func() {
+		recover()
+		c.lock.Unlock()
+	}()
 	f, has := c.valueMap[key]
 	if has {
 		f.value = value

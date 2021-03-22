@@ -35,13 +35,15 @@ func (c *LfuCache) Get(key string) (val interface{}, has bool) {
 }
 
 func (c *LfuCache) Set(key string, value interface{}) {
-	c.lock.RLock()
+	c.lock.Lock()
+	defer func() {
+		recover()
+		c.lock.Unlock()
+	}()
 	f, has := c.valueMap[key]
-	c.lock.RUnlock()
 	if has {
 		f.value = value
 	} else {
-		c.lock.Lock()
 		c.valueMap[key] = &freq{
 			value: value,
 			flag:  1,
@@ -63,7 +65,6 @@ func (c *LfuCache) Set(key string, value interface{}) {
 				delete(c.valueMap, minKey)
 			}
 		}
-		c.lock.Unlock()
 	}
 }
 
