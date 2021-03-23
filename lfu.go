@@ -36,10 +36,7 @@ func (c *LfuCache) Get(key string) (val interface{}, has bool) {
 
 func (c *LfuCache) Set(key string, value interface{}) {
 	c.lock.Lock()
-	defer func() {
-		recover()
-		c.lock.Unlock()
-	}()
+	defer c.lock.Unlock()
 	f, has := c.valueMap[key]
 	if has {
 		f.value = value

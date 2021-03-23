@@ -38,10 +38,7 @@ func (c *FifoCache) Get(key string) (val interface{}, has bool) {
 
 func (c *FifoCache) Set(key string, value interface{}) {
 	c.lock.Lock()
-	defer func() {
-		recover()
-		c.lock.Unlock()
-	}()
+	defer c.lock.Unlock()
 	f, has := c.valueMap[key]
 	if has {
 		f.value = value
@@ -56,7 +53,7 @@ func (c *FifoCache) Set(key string, value interface{}) {
 			value: value,
 			flag:  c.nowIndex,
 		}
-		// 清理访问次数最少的1/2
+		// 清理最老的1/2
 		if uint(len(c.valueMap)) > c.Capacity {
 			min := c.nowIndex - c.Capacity/2
 			for k, f := range c.valueMap {
@@ -69,14 +66,12 @@ func (c *FifoCache) Set(key string, value interface{}) {
 }
 
 func (c *FifoCache) Del(key string) {
-	c.lock.RLock()
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	_, has := c.valueMap[key]
-	c.lock.RUnlock()
 	if !has {
 		return
 	}
-	c.lock.Lock()
-	defer c.lock.Unlock()
 	delete(c.valueMap, key)
 }
 
