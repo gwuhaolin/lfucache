@@ -45,19 +45,3 @@ func TestFifo(t *testing.T) {
 //	testGetSet(t, NewLfuCache)
 //	testCapacity(t, NewLfuCache)
 //}
-
-func TestName(t *testing.T) {
-	defer func() {
-		recover()
-	}()
-	defer println(1)
-	defer println(2)
-
-	f := func() {
-		panic("2")
-	}
-
-	f()
-	panic("1")
-	println("a")
-}
