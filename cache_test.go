@@ -1,6 +1,8 @@
 package lfucache
 
 import (
+	"fmt"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,6 +41,22 @@ func testCapacity(t *testing.T, cacheBuilder func(capacity uint) Cache) {
 func TestFifo(t *testing.T) {
 	testGetSet(t, NewFifoCache)
 	testCapacity(t, NewFifoCache)
+	//testOOM(t, NewFifoCache)
+}
+
+func testOOM(t *testing.T, cacheBuilder func(capacity uint) Cache) {
+	cache := cacheBuilder(10240)
+	c := make(chan interface{}, 1000)
+	for {
+		c <- nil
+		go func() {
+			key := fmt.Sprintf(`%d`, rand.Int())
+			cache.Set(key, key)
+			t.Log(cache.Len(), key)
+			<-c
+		}()
+	}
+	<-c
 }
 
 //func TestLFU(t *testing.T) {
