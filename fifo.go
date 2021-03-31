@@ -1,6 +1,8 @@
 package lfucache
 
-import "sync"
+import (
+	"sync"
+)
 
 type FifoCache struct {
 	Cache
@@ -15,7 +17,7 @@ type index struct {
 	flag  uint
 }
 
-const maxUint = ^uint(0)
+//const maxUint = ^uint(0)
 
 func NewFifoCache(capacity uint) Cache {
 	return &FifoCache{
@@ -43,11 +45,12 @@ func (c *FifoCache) Set(key string, value interface{}) {
 	if has {
 		f.value = value
 	} else {
-		if c.nowIndex >= maxUint {
-			// 清除
-			c.valueMap = map[string]*index{}
-			c.nowIndex = 0
-		}
+		// 出现 constant 18446744073709551616 overflows uint 的概览太小了，先忽略这个逻辑
+		//if c.nowIndex >= maxUint {
+		//	// 清除
+		//	c.valueMap = map[string]*index{}
+		//	c.nowIndex = 0
+		//}
 		c.nowIndex++
 		c.valueMap[key] = &index{
 			value: value,

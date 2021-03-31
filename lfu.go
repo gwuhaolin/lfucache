@@ -53,8 +53,8 @@ func (c *LfuCache) Set(key string, value interface{}) {
 			}
 			m := sum / len(c.valueMap)
 			for k, f := range c.valueMap {
-				if f.cnt == 1 {
-					break
+				if f.cnt == 0 {
+					continue
 				}
 				if f.cnt <= m {
 					delete(c.valueMap, k)
